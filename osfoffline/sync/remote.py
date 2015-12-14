@@ -13,6 +13,7 @@ from osfoffline.sync.exceptions import FolderNotInFileSystem
 from osfoffline.sync.ext.auditor import Auditor
 from osfoffline.sync.ext.auditor import EventType
 from osfoffline.tasks.resolution import RESOLUTION_MAP
+from osfoffline.tasks.notifications import Notification, SyncStatus
 from osfoffline.utils import Singleton
 from osfoffline.utils.authentication import get_current_user
 from osfoffline.tasks.queue import OperationWorker
@@ -68,6 +69,8 @@ class RemoteSyncWorker(threading.Thread, metaclass=Singleton):
             LocalSyncWorker().ignore.clear()
             logger.info('Finished remote sync')
         logger.info('Stopped RemoteSyncWorker')
+        # Notify application that sync completed with normal exit status- TODO: report errors
+        Notification().sync_status(SyncStatus.NORMAL)
 
     def stop(self):
         logger.info('Stopping RemoteSyncWorker')

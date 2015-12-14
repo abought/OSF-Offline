@@ -4,6 +4,7 @@ import threading
 from osfoffline.sync.local import LocalSyncWorker
 from osfoffline.sync.remote import RemoteSyncWorker
 from osfoffline.tasks import Intervention, Notification
+from osfoffline.tasks.notifications import SyncStatus
 from osfoffline.tasks.queue import OperationWorker
 from osfoffline.utils import Singleton
 
@@ -12,18 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class BackgroundHandler(metaclass=Singleton):
-    # def __init__(self, status_signal):
-    #     """
-    #     Worker thread. Executes core sync operations throughout the program.
-    #     :param pysignal or None status_signal: A pyqt5-style pysignal object used to communicate sync status
-    #         to a visual indicator
-    #     :return:
-    #     """
-    #     # TODO: Remove? super().__init__(status_signal)
-    #
-    #     # Start out with null variables for NoneType errors rather than Attribute Errors
-    #     self.user = None
-
     # TODO: Find a good fix for ulimit setting
     # try:
     #     self.observer.start()  # start
@@ -38,6 +27,9 @@ class BackgroundHandler(metaclass=Singleton):
     def set_notification_cb(self, cb):
         Notification().set_callback(cb)
 
+    def set_status_callback(self, cb):
+        Notification().set_status_callback(cb)
+
     def start(self):
         # Avoid blocking the UI thread, Remote Sync initialization can request user intervention.
         threading.Thread(target=self._start).start()
@@ -51,9 +43,13 @@ class BackgroundHandler(metaclass=Singleton):
         LocalSyncWorker().start()
 
     def sync_now(self):
+        Notification().sync_status(SyncStatus.SYNC)
         RemoteSyncWorker().sync_now()
 
     def stop(self):
+        # Set sync status to normal. When error handling is added, optionally can set error state
+        Notification().sync_status(SyncStatus.NORMAL)
+
         OperationWorker().stop()
         RemoteSyncWorker().stop()
         LocalSyncWorker().stop()

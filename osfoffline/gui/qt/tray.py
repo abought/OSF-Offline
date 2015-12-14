@@ -1,4 +1,3 @@
-from enum import Enum
 import logging
 import os
 
@@ -24,17 +23,11 @@ from osfoffline.database.models import User
 from osfoffline.database.utils import save
 from osfoffline.gui.qt.login import LoginScreen
 from osfoffline.gui.qt.menu import OSFOfflineMenu
+from osfoffline.tasks.notifications import SyncStatus
 from osfoffline.utils.validators import validate_containing_folder
 
 
 logger = logging.getLogger(__name__)
-
-
-class TrayIcons(Enum):
-    NORMAL = ':/tray_icon.png'
-    PAUSE = ':/tray_icon_pause.png'
-    SYNC = ':/tray_icon_sync.png'
-    ERROR = ':/tray_icon_stop.png'
 
 
 class QResizableMessageBox(QMessageBox):
@@ -58,6 +51,8 @@ class QResizableMessageBox(QMessageBox):
 
 
 class OSFOfflineQT(QSystemTrayIcon):
+    # Signal the system tray icon to change depending on sync status
+    status_signal = pyqtSignal(object)
 
     def __init__(self, application):
         super().__init__(QIcon(':/tray_icon.png'), application)
@@ -79,6 +74,8 @@ class OSFOfflineQT(QSystemTrayIcon):
             # (self.preferences.ui.accountLogOutButton.clicked, self.logout),
             (self.intervention_handler.notify_signal, self.on_intervention),
             (self.notification_handler.notify_signal, self.on_notification),
+            # Define status signal here, so that it stays connected even if worker threads destroyed/restarted
+            (self.status_signal, self.setIcon)
         ]
         for signal, slot in signal_slot_pairs:
             signal.connect(slot)
@@ -106,6 +103,7 @@ class OSFOfflineQT(QSystemTrayIcon):
         self.background_handler = BackgroundHandler()
         self.background_handler.set_intervention_cb(self.intervention_handler.enqueue_signal.emit)
         self.background_handler.set_notification_cb(self.notification_handler.enqueue_signal.emit)
+        self.background_handler.set_status_callback(self.status_signal.emit)
         self.background_handler.start()
         return True
 
@@ -170,7 +168,7 @@ class OSFOfflineQT(QSystemTrayIcon):
     def setIcon(self, enum_choice):
         """
         Change the system tray icon to reflect application state
-        :param TrayIcons enum_choice: An option from the enum of recognized tray icons
+        :param SyncStatus enum_choice: An option from the enum of recognized sync states
         :return:
         """
         icon_path = enum_choice.value
