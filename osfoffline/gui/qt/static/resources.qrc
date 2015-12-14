@@ -2,6 +2,10 @@
 <RCC version="1.0">
     <qresource>
         <file alias="tray_icon.png">images/tray_icon.png</file>
+        <file alias="tray_icon_color.png">images/tray_icon_color.png</file>
+        <file alias="tray_icon_stop.png">images/tray_icon_stop.png</file>
+        <file alias="tray_icon_pause.png">images/tray_icon_pause.png</file>
+        <file alias="tray_icon_sync.png">images/tray_icon_sync.png</file>
     </qresource>
 </RCC>
 

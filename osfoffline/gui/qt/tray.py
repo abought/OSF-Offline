@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 import os
 
@@ -27,6 +28,13 @@ from osfoffline.utils.validators import validate_containing_folder
 
 
 logger = logging.getLogger(__name__)
+
+
+class TrayIcons(Enum):
+    NORMAL = ':/tray_icon.png'
+    PAUSE = ':/tray_icon_pause.png'
+    SYNC = ':/tray_icon_sync.png'
+    ERROR = ':/tray_icon_stop.png'
 
 
 class QResizableMessageBox(QMessageBox):
@@ -158,6 +166,15 @@ class OSFOfflineQT(QSystemTrayIcon):
         finally:
             logger.info('Quitting application')
             QApplication.instance().quit()
+
+    def setIcon(self, enum_choice):
+        """
+        Change the system tray icon to reflect application state
+        :param TrayIcons enum_choice: An option from the enum of recognized tray icons
+        :return:
+        """
+        icon_path = enum_choice.value
+        return super(OSFOfflineQT, self).setIcon(QIcon(icon_path))
 
     def sync_now(self):
         self.background_handler.sync_now()

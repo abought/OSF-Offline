@@ -12,6 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 class BackgroundHandler(metaclass=Singleton):
+    # def __init__(self, status_signal):
+    #     """
+    #     Worker thread. Executes core sync operations throughout the program.
+    #     :param pysignal or None status_signal: A pyqt5-style pysignal object used to communicate sync status
+    #         to a visual indicator
+    #     :return:
+    #     """
+    #     # TODO: Remove? super().__init__(status_signal)
+    #
+    #     # Start out with null variables for NoneType errors rather than Attribute Errors
+    #     self.user = None
 
     # TODO: Find a good fix for ulimit setting
     # try:
