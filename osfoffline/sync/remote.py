@@ -56,6 +56,7 @@ class RemoteSyncWorker(threading.Thread, metaclass=Singleton):
                 logger.info('Sleep interrupted, syncing now')
             self._sync_now_event.clear()
 
+            Notification().sync_status(SyncStatus.SYNC)
             # Ensure selected node directories exist
             for node in Session().query(Node).all():
                 local = Path(os.path.join(node.path, settings.OSF_STORAGE_FOLDER))
@@ -68,9 +69,9 @@ class RemoteSyncWorker(threading.Thread, metaclass=Singleton):
             time.sleep(10)  # TODO Fix me
             LocalSyncWorker().ignore.clear()
             logger.info('Finished remote sync')
+            # Notify application that sync completed with normal exit status- TODO: report errors
+            Notification().sync_status(SyncStatus.NORMAL)
         logger.info('Stopped RemoteSyncWorker')
-        # Notify application that sync completed with normal exit status- TODO: report errors
-        Notification().sync_status(SyncStatus.NORMAL)
 
     def stop(self):
         logger.info('Stopping RemoteSyncWorker')

@@ -19,8 +19,8 @@ class SyncStatus(enum.Enum):
 class Notification(metaclass=Singleton):
 
     class Type(enum.Enum):
-        INFO = 0,
-        WARNING = 1,
+        INFO = 0
+        WARNING = 1
         ERROR = 2
 
     class Event:
@@ -32,28 +32,28 @@ class Notification(metaclass=Singleton):
     def __init__(self):
         self.queue = queue.Queue()
 
-        # Define event handlers used for notifications
-        noop = lambda x: None
-        self.cb = noop
+        def noop(*args, **kwargs): pass
+        # Define event handler callbacks used for notifications
+        self.notify_cb = noop
         self.status_cb = noop
 
     def set_callback(self, cb):
-        self.cb = cb
+        self.notify_cb = cb
 
     def info(self, msg):
         event = self.Event(self.Type.INFO, msg)
         logger.info('Notification: {}'.format(event))
-        self.cb(event)
+        self.notify_cb(event)
 
     def warn(self, msg):
         event = self.Event(self.Type.WARNING, msg)
         logger.warn('Notification: {}'.format(event))
-        self.cb(event)
+        self.notify_cb(event)
 
     def error(self, msg):
         event = self.Event(self.Type.ERROR, msg)
         logger.error('Notification: {}'.format(event))
-        self.cb(event)
+        self.notify_cb(event)
 
     def set_status_callback(self, cb):
         """Define the callback that fires when the sync operation state is changed"""

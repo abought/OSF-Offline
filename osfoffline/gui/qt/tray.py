@@ -55,7 +55,7 @@ class OSFOfflineQT(QSystemTrayIcon):
     status_signal = pyqtSignal(object)
 
     def __init__(self, application):
-        super().__init__(QIcon(':/tray_icon.png'), application)
+        super().__init__(QIcon(':/tray_icon_color.png'), application)
 
         self.setContextMenu(OSFOfflineMenu(self))
         self.show()
